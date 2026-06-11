@@ -8,9 +8,9 @@ namespace ArcGisAiAssistant.AddIn.ArcGis;
 
 internal sealed class MapContextService
 {
-    public Task<AiRequestContext> CreateContextAsync(string userInput, bool maskExtent = false, bool maskFieldValues = false)
+    public Task<AiRequestContext> CreateContextAsync(string userInput, bool maskExtent = false, bool maskFieldValues = false, IReadOnlyList<string>? targetLayerNames = null)
     {
-        return CreateContextInternalAsync(userInput, maskExtent, maskFieldValues);
+        return CreateContextInternalAsync(userInput, maskExtent, maskFieldValues, targetLayerNames);
     }
 
     public Task<AiRequestContext> CreateContextAsync(string userInput)
@@ -18,13 +18,16 @@ internal sealed class MapContextService
         return CreateContextInternalAsync(userInput, false, false);
     }
 
-    private Task<AiRequestContext> CreateContextInternalAsync(string userInput, bool maskExtent, bool maskFieldValues)
+    private Task<AiRequestContext> CreateContextInternalAsync(string userInput, bool maskExtent, bool maskFieldValues, IReadOnlyList<string>? targetLayerNames = null)
     {
         return QueuedTask.Run(() =>
         {
             var activeMapView = MapView.Active;
             var map = activeMapView?.Map;
-            var layers = map?.GetLayersAsFlattenedList().ToArray() ?? Array.Empty<Layer>();
+            var allLayers = map?.GetLayersAsFlattenedList().ToArray() ?? Array.Empty<Layer>();
+            var layers = targetLayerNames is { Count: > 0 }
+                ? allLayers.Where(l => targetLayerNames.Contains(l.Name, StringComparer.OrdinalIgnoreCase)).ToArray()
+                : allLayers;
             var layerNames = layers.Select(layer => layer.Name).ToArray();
             var layerProfiles = layers.Select(l => CreateLayerProfile(l, maskFieldValues)).ToArray();
             var selectedLayerNames = TryGetSelectedLayerNames(activeMapView);

@@ -129,16 +129,15 @@ internal class AiAssistantDockPaneViewModel : DockPane
 
         try
         {
-            var context = await _mapContextService.CreateContextAsync(input, _maskExtent, _maskFieldValues).ConfigureAwait(true);
             var pickedLayers = GetSelectedLayerNames();
             if (pickedLayers.Count > 0)
                 AddStep("选定图层", string.Join(", ", pickedLayers));
+            var context = await _mapContextService.CreateContextAsync(input, _maskExtent, _maskFieldValues, pickedLayers).ConfigureAwait(true);
             AddStep("Map context", FormatContext(context));
 
             Status = "2/6 Building prompt";
             var prompt = _promptOrchestrator.BuildPrompt(context, _conversationHistory);
-            if (pickedLayers.Count > 0)
-                prompt += "\n\n【用户选定的目标图层】: " + string.Join(", ", pickedLayers) + "\n优先对这些图层执行操作。";
+            
             AddStep("Prompt sent to DeepSeek", Truncate(prompt, 2000));
 
             Status = "3/6 Asking DeepSeek";
@@ -513,7 +512,8 @@ internal class AiAssistantDockPaneViewModel : DockPane
 
         try
         {
-            var context = await _mapContextService.CreateContextAsync("分析项目", _maskExtent, _maskFieldValues).ConfigureAwait(true);
+            var pickedLayers = GetSelectedLayerNames();
+            var context = await _mapContextService.CreateContextAsync("分析项目", _maskExtent, _maskFieldValues, pickedLayers).ConfigureAwait(true);
             AddStep("Map context", FormatContext(context));
 
             var analysisPrompt = _promptOrchestrator.BuildAnalysisPrompt(context);
