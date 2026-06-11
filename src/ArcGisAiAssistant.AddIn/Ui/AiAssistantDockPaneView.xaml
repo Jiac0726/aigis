@@ -15,27 +15,24 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-      <TextBlock Text="{Binding Status}" FontWeight="SemiBold" VerticalAlignment="Center" />
-      <CheckBox IsChecked="{Binding IsSandboxMode}" Content="安全模式"
-                FontSize="11" Foreground="#666" Margin="12,0,0,0"
-                VerticalAlignment="Center"
-                ToolTip="所有 AI 输出写入独立沙箱 Geodatabase" />
-    </StackPanel>
-
-    <Expander Header="隐私设置" IsExpanded="False" FontSize="11" Foreground="#888" Margin="0,0,0,4">
-      <StackPanel>
-        <CheckBox IsChecked="{Binding MaskExtent}" Content="遮蔽坐标范围"
-                  FontSize="11" Margin="4,2,0,0"
-                  ToolTip="不发送地图坐标范围到 AI" />
-        <CheckBox IsChecked="{Binding MaskFieldValues}" Content="遮蔽图层名称"
-                  FontSize="11" Margin="4,2,0,0"
-                  ToolTip="图层名替换为匿名标识，保护项目信息" />
-        <CheckBox IsChecked="{Binding RequirePromptReview}" Content="发送前预览"
-                  FontSize="11" Margin="4,2,0,0"
-                  ToolTip="将发送给 AI 的完整 Prompt 显示在面板中，确认后再发送" />
+    <StackPanel Margin="0,0,0,6">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="{Binding Status}" FontWeight="SemiBold" VerticalAlignment="Center" />
+        <CheckBox IsChecked="{Binding IsSandboxMode}" Content="安全模式"
+                  FontSize="11" Foreground="#666" Margin="12,0,0,0" VerticalAlignment="Center"
+                  ToolTip="所有 AI 输出写入独立沙箱 Geodatabase" />
       </StackPanel>
-    </Expander>
+      <Expander Header="隐私设置" IsExpanded="False" FontSize="11" Foreground="#888" Margin="0,2,0,0">
+        <StackPanel>
+          <CheckBox IsChecked="{Binding MaskExtent}" Content="遮蔽坐标范围"
+                    FontSize="11" Margin="4,2,0,0" ToolTip="不发送地图坐标范围到 AI" />
+          <CheckBox IsChecked="{Binding MaskFieldValues}" Content="遮蔽图层名称"
+                    FontSize="11" Margin="4,2,0,0" ToolTip="图层名替换为匿名标识" />
+          <CheckBox IsChecked="{Binding RequirePromptReview}" Content="发送前预览"
+                    FontSize="11" Margin="4,2,0,0" ToolTip="确认后再发送 Prompt" />
+        </StackPanel>
+      </Expander>
+    </StackPanel>
 
     <Border Grid.Row="1" BorderBrush="#D0D7DE" BorderThickness="1" Padding="8">
       <ListBox ItemsSource="{Binding Messages}"
@@ -44,9 +41,7 @@
                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <TextBlock Text="{Binding}"
-                       TextWrapping="Wrap"
-                       Margin="0,0,0,8" />
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,8" />
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
@@ -87,9 +82,7 @@
                   </Border>
                 </StackPanel>
                 <TextBlock Text="{Binding DialogueText}"
-                           FontSize="11"
-                           TextWrapping="Wrap"
-                           Margin="0,3,0,0" />
+                           FontSize="11" TextWrapping="Wrap" Margin="0,3,0,0" />
               </StackPanel>
             </Border>
           </DataTemplate>
