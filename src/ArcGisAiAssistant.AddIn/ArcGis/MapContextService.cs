@@ -24,7 +24,7 @@ internal sealed class MapContextService
         {
             var activeMapView = MapView.Active;
             var map = activeMapView?.Map;
-            var allLayers = map?.GetLayersAsFlattenedList().ToArray() ?? Array.Empty<Layer>();
+            var allLayers = map is not null ? FlattenLayers(map.Layers).ToArray() : Array.Empty<Layer>();
             var layers = targetLayerNames is { Count: > 0 }
                 ? allLayers.Where(l => targetLayerNames.Contains(l.Name, StringComparer.OrdinalIgnoreCase)).ToArray()
                 : allLayers;
@@ -43,13 +43,32 @@ internal sealed class MapContextService
     }
 
 
+
+    private static IEnumerable<Layer> FlattenLayers(IEnumerable<Layer> layers)
+    {
+        foreach (var layer in layers)
+        {
+            yield return layer;
+            if (layer is ArcGIS.Desktop.Mapping.CompositeLayer composite)
+            {
+                foreach (var child in FlattenLayers(composite.Layers))
+                    yield return child;
+            }
+            else if (layer is ArcGIS.Desktop.Mapping.GroupLayer group)
+            {
+                foreach (var child in FlattenLayers(group.Layers))
+                    yield return child;
+            }
+        }
+    }
+
     public static Task<IReadOnlyList<LayerSelection>> GetLayerSelectionsAsync()
     {
         return QueuedTask.Run(() =>
         {
             var map = MapView.Active?.Map;
             if (map is null) return Array.Empty<LayerSelection>();
-            return (IReadOnlyList<LayerSelection>)map.GetLayersAsFlattenedList()
+            return (IReadOnlyList<LayerSelection>)FlattenLayers(map.Layers)
                 .Select(l =>
                 {
                     string? geom = null;
