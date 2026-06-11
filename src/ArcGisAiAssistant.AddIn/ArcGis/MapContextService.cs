@@ -2,7 +2,6 @@ using ArcGisAiAssistant.AddIn.Models;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-using ArcGisAiAssistant.AddIn.Models;
 
 namespace ArcGisAiAssistant.AddIn.ArcGis;
 
@@ -51,7 +50,7 @@ internal sealed class MapContextService
             yield return layer;
             if (layer is ArcGIS.Desktop.Mapping.ILayerContainer container)
             {
-                foreach (var child in FlattenLayers(container.GetLayers()))
+                foreach (var child in FlattenLayers(container.Layers))
                     yield return child;
             }
         }
