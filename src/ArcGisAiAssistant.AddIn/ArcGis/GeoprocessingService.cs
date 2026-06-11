@@ -3,6 +3,7 @@ using ArcGIS.Desktop.Core;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGisAiAssistant.AddIn.Models;
+using ArcGisAiAssistant.AddIn.Services;
 using System.IO;
 
 namespace ArcGisAiAssistant.AddIn.ArcGis;
@@ -201,6 +202,9 @@ internal sealed class GeoprocessingService
             try { messages = result.Messages.Select(m => m.Text).ToArray(); }
             catch { messages = Array.Empty<string>(); }
 
+            var paramsSummary = string.Join(", ", values);
+            AuditLogger.Log(arcgisToolName, paramsSummary, !result.IsFailed, result.IsFailed ? $"ErrorCode={result.ErrorCode}" : null);
+
             if (result.IsFailed)
             {
                 var detail = BuildFailureMessage(arcgisToolName, messages);
@@ -290,14 +294,39 @@ return ExecutionResult.Failure($"{arcgisToolName} failed: {ex.GetType().Name}: {
 
     private static string BuildOutputPath(string? requestedOutputName, string fallbackName)
     {
-        var geodatabasePath = Project.Current?.DefaultGeodatabasePath;
-        if (string.IsNullOrWhiteSpace(geodatabasePath))
+        var basePath = GetSandboxGeodatabasePath();
+        var outputName = SanitizeDatasetName(string.IsNullOrWhiteSpace(requestedOutputName) ? fallbackName : requestedOutputName);
+        return Path.Combine(basePath, outputName);
+    }
+
+    private static string GetSandboxGeodatabasePath()
+    {
+        var projectHome = Project.Current?.HomeFolderPath;
+        if (string.IsNullOrWhiteSpace(projectHome))
+            throw new InvalidOperationException("Current project does not have a home folder.");
+
+        var sandboxGdb = Path.Combine(projectHome, "AiSandbox.gdb");
+        if (!Directory.Exists(sandboxGdb))
         {
-            throw new InvalidOperationException("Current project does not have a default geodatabase.");
+            // Create the sandbox geodatabase via GP
+            try
+            {
+                var createValues = Geoprocessing.MakeValueArray(sandboxGdb);
+                Geoprocessing.ExecuteToolAsync(
+                    "management.CreateFileGDB",
+                    createValues,
+                    null, null, null,
+                    GPExecuteToolFlags.None).GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // Fall back to default if sandbox creation fails
+                return Project.Current?.DefaultGeodatabasePath
+                    ?? throw new InvalidOperationException("Cannot create sandbox geodatabase and no default GDB available.");
+            }
         }
 
-        var outputName = SanitizeDatasetName(string.IsNullOrWhiteSpace(requestedOutputName) ? fallbackName : requestedOutputName);
-        return Path.Combine(geodatabasePath, outputName);
+        return sandboxGdb;
     }
 
     private static string NormalizeDistance(string rd){if(string.IsNullOrWhiteSpace(rd))return "0 Meters";var m=System.Text.RegularExpressions.Regex.Match(rd,@"(?<v>\d+(?:\.\d+)?)\s*(?<u>米|m|meter|meters|千米|公里|km|kilometer|kilometers)",System.Text.RegularExpressions.RegexOptions.IgnoreCase);if(m.Success){var v=m.Groups["v"].Value;return m.Groups["u"].Value.ToLowerInvariant() is "千米" or "公里" or "km" or "kilometer" or "kilometers"?$"{v} Kilometers":$"{v} Meters";}var nm=System.Text.RegularExpressions.Regex.Match(rd,@"\d+(?:\.\d+)?");return nm.Success?$"{nm.Value} Meters":rd;}

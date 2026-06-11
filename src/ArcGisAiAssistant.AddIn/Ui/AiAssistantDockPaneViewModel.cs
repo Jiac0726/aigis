@@ -57,6 +57,13 @@ internal class AiAssistantDockPaneViewModel : DockPane
         private set => SetProperty(ref _status, value);
     }
 
+    private bool _isSandboxMode = true;
+    public bool IsSandboxMode
+    {
+        get => _isSandboxMode;
+        set => SetProperty(ref _isSandboxMode, value);
+    }
+
     public bool IsRunning
     {
         get => _isRunning;
@@ -159,7 +166,13 @@ internal class AiAssistantDockPaneViewModel : DockPane
                 }
             }
 
-            if (workflow.RequiresConfirmation)
+            var hasDestructive = workflow.Steps.Any(s => s.ToolName is "buffer" or "clip" or "intersect" or "spatial_join");
+            if (_isSandboxMode && hasDestructive)
+            {
+                AddStep("安全模式", "检测到会修改数据的操作。AI 输出将写入隔离沙箱 Geodatabase。");
+            }
+
+            if (workflow.RequiresConfirmation || (_isSandboxMode && hasDestructive))
             {
                 Status = "5/6 Waiting for confirmation";
                 AddStep("Confirmation required", workflow.Summary);

@@ -15,7 +15,13 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <TextBlock Text="{Binding Status}" FontWeight="SemiBold" Margin="0,0,0,8" />
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+      <TextBlock Text="{Binding Status}" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <CheckBox IsChecked="{Binding IsSandboxMode}" Content="安全模式"
+                FontSize="11" Foreground="#666" Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                ToolTip="开启后所有 AI 生成的输出写入独立沙箱 Geodatabase，保护原始数据" />
+    </StackPanel>
 
     <Border Grid.Row="1" BorderBrush="#D0D7DE" BorderThickness="1" Padding="8">
       <ListBox ItemsSource="{Binding Messages}"
