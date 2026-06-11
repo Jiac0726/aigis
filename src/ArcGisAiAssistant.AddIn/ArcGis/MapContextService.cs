@@ -49,14 +49,9 @@ internal sealed class MapContextService
         foreach (var layer in layers)
         {
             yield return layer;
-            if (layer is ArcGIS.Desktop.Mapping.CompositeLayer composite)
+            if (layer is ArcGIS.Desktop.Mapping.ILayerContainer container)
             {
-                foreach (var child in FlattenLayers(composite.Layers))
-                    yield return child;
-            }
-            else if (layer is ArcGIS.Desktop.Mapping.GroupLayer group)
-            {
-                foreach (var child in FlattenLayers(group.Layers))
+                foreach (var child in FlattenLayers(container.GetLayers()))
                     yield return child;
             }
         }
