@@ -20,8 +20,22 @@
       <CheckBox IsChecked="{Binding IsSandboxMode}" Content="安全模式"
                 FontSize="11" Foreground="#666" Margin="12,0,0,0"
                 VerticalAlignment="Center"
-                ToolTip="开启后所有 AI 生成的输出写入独立沙箱 Geodatabase，保护原始数据" />
+                ToolTip="所有 AI 输出写入独立沙箱 Geodatabase" />
     </StackPanel>
+
+    <Expander Header="隐私设置" IsExpanded="False" FontSize="11" Foreground="#888" Margin="0,0,0,4">
+      <StackPanel>
+        <CheckBox IsChecked="{Binding MaskExtent}" Content="遮蔽坐标范围"
+                  FontSize="11" Margin="4,2,0,0"
+                  ToolTip="不发送地图坐标范围到 AI" />
+        <CheckBox IsChecked="{Binding MaskFieldValues}" Content="遮蔽图层名称"
+                  FontSize="11" Margin="4,2,0,0"
+                  ToolTip="图层名替换为匿名标识，保护项目信息" />
+        <CheckBox IsChecked="{Binding RequirePromptReview}" Content="发送前预览"
+                  FontSize="11" Margin="4,2,0,0"
+                  ToolTip="将发送给 AI 的完整 Prompt 显示在面板中，确认后再发送" />
+      </StackPanel>
+    </Expander>
 
     <Border Grid.Row="1" BorderBrush="#D0D7DE" BorderThickness="1" Padding="8">
       <ListBox ItemsSource="{Binding Messages}"

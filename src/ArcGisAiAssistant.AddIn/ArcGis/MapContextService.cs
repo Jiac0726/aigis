@@ -7,7 +7,17 @@ namespace ArcGisAiAssistant.AddIn.ArcGis;
 
 internal sealed class MapContextService
 {
+    public Task<AiRequestContext> CreateContextAsync(string userInput, bool maskExtent = false, bool maskFieldValues = false)
+    {
+        return CreateContextInternalAsync(userInput, maskExtent, maskFieldValues);
+    }
+
     public Task<AiRequestContext> CreateContextAsync(string userInput)
+    {
+        return CreateContextInternalAsync(userInput, false, false);
+    }
+
+    private Task<AiRequestContext> CreateContextInternalAsync(string userInput, bool maskExtent, bool maskFieldValues)
     {
         return QueuedTask.Run(() =>
         {
@@ -24,7 +34,7 @@ internal sealed class MapContextService
                 layerNames,
                 layerProfiles,
                 selectedLayerNames,
-                activeMapView?.Extent?.ToString());
+                maskExtent ? "(masked)" : activeMapView?.Extent?.ToString());
         });
     }
 
@@ -54,8 +64,9 @@ internal sealed class MapContextService
             }
         }
 
+        var displayName = maskFieldValues ? $"Layer_{layer.GetHashCode() & 0xFFF:X3}" : layer.Name;
         return new LayerProfile(
-            layer.Name,
+            displayName,
             layer.GetType().Name,
             geometryType,
             layer.IsVisible,

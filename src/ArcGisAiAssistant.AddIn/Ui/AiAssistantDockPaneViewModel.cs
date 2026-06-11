@@ -58,6 +58,27 @@ internal class AiAssistantDockPaneViewModel : DockPane
     }
 
     private bool _isSandboxMode = true;
+    private bool _maskExtent = true;
+    private bool _maskFieldValues = true;
+    private bool _requirePromptReview = true;
+    public bool MaskExtent
+    {
+        get => _maskExtent;
+        set => SetProperty(ref _maskExtent, value);
+    }
+
+    public bool MaskFieldValues
+    {
+        get => _maskFieldValues;
+        set => SetProperty(ref _maskFieldValues, value);
+    }
+
+    public bool RequirePromptReview
+    {
+        get => _requirePromptReview;
+        set => SetProperty(ref _requirePromptReview, value);
+    }
+
     public bool IsSandboxMode
     {
         get => _isSandboxMode;
@@ -104,7 +125,7 @@ internal class AiAssistantDockPaneViewModel : DockPane
 
         try
         {
-            var context = await _mapContextService.CreateContextAsync(input).ConfigureAwait(true);
+            var context = await _mapContextService.CreateContextAsync(input, _maskExtent, _maskFieldValues).ConfigureAwait(true);
             AddStep("Map context", FormatContext(context));
 
             Status = "2/6 Building prompt";
