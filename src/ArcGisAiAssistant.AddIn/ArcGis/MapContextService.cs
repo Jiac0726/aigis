@@ -1,3 +1,4 @@
+using ArcGisAiAssistant.AddIn.Models;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
@@ -35,6 +36,34 @@ internal sealed class MapContextService
                 layerProfiles,
                 selectedLayerNames,
                 maskExtent ? "(masked)" : activeMapView?.Extent?.ToString());
+        });
+    }
+
+
+    public static Task<IReadOnlyList<LayerSelection>> GetLayerSelectionsAsync()
+    {
+        return QueuedTask.Run(() =>
+        {
+            var map = MapView.Active?.Map;
+            if (map is null) return Array.Empty<LayerSelection>();
+            return (IReadOnlyList<LayerSelection>)map.GetLayersAsFlattenedList()
+                .Select(l =>
+                {
+                    string? geom = null;
+                    long? count = null;
+                    if (l is BasicFeatureLayer bfl)
+                    {
+                        geom = bfl.ShapeType.ToString();
+                        try { count = bfl.GetTable().GetCount(); } catch { }
+                    }
+                    return new LayerSelection
+                    {
+                        Name = l.Name,
+                        GeometryType = geom ?? l.GetType().Name,
+                        IsVisible = l.IsVisible,
+                        RowCount = count
+                    };
+                }).ToArray();
         });
     }
 

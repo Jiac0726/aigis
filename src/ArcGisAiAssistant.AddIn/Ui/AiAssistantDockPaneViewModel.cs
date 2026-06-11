@@ -29,15 +29,19 @@ internal class AiAssistantDockPaneViewModel : DockPane
         _intentRouter = new IntentRouter(new MapCommandService(), new GeoprocessingService());
         SubmitCommand = new AsyncRelayCommand(SubmitAsync, () => !IsRunning && !string.IsNullOrWhiteSpace(UserInput));
         AnalyzeProjectCommand = new AsyncRelayCommand(AnalyzeProjectAsync, () => !IsRunning);
+        RefreshLayersCommand = new AsyncRelayCommand(RefreshLayersAsync, () => !IsRunning);
+        _ = RefreshLayersAsync();
         _taskHistoryStore.Load();
         foreach (var r in _taskHistoryStore.Records) TaskHistory.Add(r);
     }
 
     public ObservableCollection<string> Messages { get; } = new();
     public ObservableCollection<TaskRecord> TaskHistory { get; } = new();
+    public ObservableCollection<LayerSelection> LayerSelections { get; } = new();
 
     public ICommand SubmitCommand { get; }
     public ICommand AnalyzeProjectCommand { get; }
+    public ICommand RefreshLayersCommand { get; }
 
     public string UserInput
     {
@@ -126,10 +130,15 @@ internal class AiAssistantDockPaneViewModel : DockPane
         try
         {
             var context = await _mapContextService.CreateContextAsync(input, _maskExtent, _maskFieldValues).ConfigureAwait(true);
+            var pickedLayers = GetSelectedLayerNames();
+            if (pickedLayers.Count > 0)
+                AddStep("选定图层", string.Join(", ", pickedLayers));
             AddStep("Map context", FormatContext(context));
 
             Status = "2/6 Building prompt";
             var prompt = _promptOrchestrator.BuildPrompt(context, _conversationHistory);
+            if (pickedLayers.Count > 0)
+                prompt += "\n\n【用户选定的目标图层】: " + string.Join(", ", pickedLayers) + "\n优先对这些图层执行操作。";
             AddStep("Prompt sent to DeepSeek", Truncate(prompt, 2000));
 
             Status = "3/6 Asking DeepSeek";
@@ -485,6 +494,17 @@ internal class AiAssistantDockPaneViewModel : DockPane
     private sealed record WorkflowValidationError(int StepNumber, ExecutionResult? Error);
 
 
+
+    private async Task RefreshLayersAsync()
+    {
+        try
+        {
+            var selections = await MapContextService.GetLayerSelectionsAsync();
+            LayerSelections.Clear();
+            foreach (var s in selections) LayerSelections.Add(s);
+        }
+        catch { }
+    }
     private async Task AnalyzeProjectAsync()
     {
         IsRunning = true;
@@ -530,6 +550,15 @@ internal class AiAssistantDockPaneViewModel : DockPane
         {
             IsRunning = false;
         }
+    }
+
+
+    private IReadOnlyList<string> GetSelectedLayerNames()
+    {
+        return LayerSelections
+            .Where(s => s.IsSelected)
+            .Select(s => s.Name)
+            .ToArray();
     }
 
     private void SaveTaskRecord(string input, AiWorkflowPlan workflow, IReadOnlyList<string> artifacts, bool succeeded, string? error)

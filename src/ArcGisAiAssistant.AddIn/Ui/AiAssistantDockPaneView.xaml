@@ -4,12 +4,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignHeight="520"
+             d:DesignHeight="600"
              d:DesignWidth="360">
   <Grid Margin="12">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -47,17 +48,37 @@
       </ListBox>
     </Border>
 
-    <TextBox Grid.Row="2"
+    <Expander Grid.Row="2" Header="选择图层" IsExpanded="True" FontSize="11" Margin="0,4,0,0">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0" HorizontalAlignment="Right" FontSize="10" Padding="4,2"
+                Content="刷新图层" Command="{Binding RefreshLayersCommand}" Margin="0,0,0,2" />
+        <ListBox Grid.Row="1" ItemsSource="{Binding LayerSelections}"
+                 MaxHeight="120" BorderThickness="0" Background="Transparent">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <CheckBox IsChecked="{Binding IsSelected}" Content="{Binding DisplayText}"
+                        FontSize="11" Margin="0,1" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Expander>
+
+    <TextBox Grid.Row="3"
              Margin="0,8,0,8"
-             MinHeight="82"
+             MinHeight="72"
              AcceptsReturn="True"
              TextWrapping="Wrap"
              VerticalScrollBarVisibility="Auto"
              Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}" />
 
-    <Expander Grid.Row="3" Header="对话历史" IsExpanded="False" Margin="0,4,0,4">
+    <Expander Grid.Row="4" Header="对话历史" IsExpanded="False" Margin="0,4,0,4">
       <ListBox ItemsSource="{Binding TaskHistory}"
-               MaxHeight="180"
+               MaxHeight="160"
                BorderThickness="0"
                Background="Transparent">
         <ListBox.ItemTemplate>
@@ -90,7 +111,7 @@
       </ListBox>
     </Expander>
 
-    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+    <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button MinWidth="96" Padding="12,6" Content="分析项目"
               Command="{Binding AnalyzeProjectCommand}" Margin="0,0,8,0" />
       <Button MinWidth="96" Padding="12,6" Content="Run"
