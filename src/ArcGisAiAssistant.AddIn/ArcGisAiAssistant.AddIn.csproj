@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ArcGisAiAssistant.AddIn</RootNamespace>
+    <AssemblyName>ArcGisAiAssistant.AddIn</AssemblyName>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <NoWarn>CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Config.daml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Config.daml" />
+    <None Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ArcGIS.Core">
+      <HintPath>$(ArcGISProBinDir)\ArcGIS.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Framework">
+      <HintPath>$(ArcGISProBinDir)\ArcGIS.Desktop.Framework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Core">
+      <HintPath>$(ArcGISProExtensionsDir)\Core\ArcGIS.Desktop.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.Mapping">
+      <HintPath>$(ArcGISProExtensionsDir)\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ArcGIS.Desktop.GeoProcessing">
+      <HintPath>$(ArcGISProExtensionsDir)\GeoProcessing\ArcGIS.Desktop.GeoProcessing.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="$(ArcGISProBinDir)\Esri.ProApp.SDK.Desktop.targets"
+          Condition="Exists('$(ArcGISProBinDir)\Esri.ProApp.SDK.Desktop.targets') AND !Exists('Esri.ArcGISPro.Extensions.targets') AND '$(SkipArcGISTargets)' != 'true'" />
+
+  <Target Name="CopySdkPackageToUserAddIns" AfterTargets="PackageArcGISContents" Condition="'$(Configuration)' == 'Debug'">
+    <PropertyGroup>
+      <ArcGISProUserAddInsDir>$(USERPROFILE)\Documents\ArcGIS\AddIns\ArcGISPro\{D0B26B57-6F64-4479-8F64-90BB3B77BEA0}\</ArcGISProUserAddInsDir>
+      <AddInPackagePath>$(OutputPath)$(AssemblyName).esriAddinX</AddInPackagePath>
+    </PropertyGroup>
+    <MakeDir Directories="$(ArcGISProUserAddInsDir)" />
+    <Copy SourceFiles="$(AddInPackagePath)"
+          DestinationFolder="$(ArcGISProUserAddInsDir)"
+          Condition="Exists('$(AddInPackagePath)')" />
+  </Target>
+</Project>

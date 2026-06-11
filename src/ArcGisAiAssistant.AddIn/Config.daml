@@ -1,0 +1,47 @@
+<ArcGIS defaultAssembly="ArcGisAiAssistant.AddIn.dll"
+        defaultNamespace="ArcGisAiAssistant.AddIn"
+        xmlns="http://schemas.esri.com/DADF/Registry"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///D:/Arcgis%20pro/bin/ArcGIS.Desktop.Framework.xsd">
+  <AddInInfo id="{D0B26B57-6F64-4479-8F64-90BB3B77BEA0}" version="1.0" desktopVersion="3.3.52636" product="ArcGISPro">
+    <Name>ArcGIS AI Assistant</Name>
+    <Description>Chinese AI assistant for natural-language cartography and spatial analysis.</Description>
+    <Author>Codex</Author>
+    <Company>Local</Company>
+    <Date>2026-06-09</Date>
+    <Subject>AI, Cartography, Geoprocessing</Subject>
+  </AddInInfo>
+  <modules>
+    <insertModule id="ArcGisAiAssistant_Module" className="Module" autoLoad="false" caption="ArcGIS AI Assistant">
+      <tabs>
+        <tab id="ArcGisAiAssistant_Tab" caption="AI Assistant">
+          <group refID="ArcGisAiAssistant_Group" />
+        </tab>
+      </tabs>
+      <groups>
+        <group id="ArcGisAiAssistant_Group" caption="Assistant" keytip="AI">
+          <button refID="ArcGisAiAssistant_ShowDockPaneButton" size="large" />
+        </group>
+      </groups>
+      <controls>
+        <button id="ArcGisAiAssistant_ShowDockPaneButton"
+                caption="AI Assistant"
+                className="ShowDockPaneButton"
+                loadOnClick="true"
+                keytip="AI"
+                smallImage="GenericButtonBlue16"
+                largeImage="GenericButtonBlue32">
+          <tooltip heading="AI Assistant">Open the AI cartography and spatial analysis assistant.<disabledText /></tooltip>
+        </button>
+      </controls>
+      <dockPanes>
+        <dockPane id="ArcGisAiAssistant_DockPane"
+                  caption="AI Assistant"
+                  className="AiAssistantDockPaneViewModel"
+                  dock="left">
+          <content className="AiAssistantDockPaneView" />
+        </dockPane>
+      </dockPanes>
+    </insertModule>
+  </modules>
+</ArcGIS>

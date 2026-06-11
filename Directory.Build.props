@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <ArcGISProInstallDir Condition="'$(ArcGISProInstallDir)' == ''">D:\Arcgis pro</ArcGISProInstallDir>
+    <ArcGISProBinDir>$(ArcGISProInstallDir)\bin</ArcGISProBinDir>
+    <ArcGISProExtensionsDir>$(ArcGISProBinDir)\Extensions</ArcGISProExtensionsDir>
+  </PropertyGroup>
+</Project>

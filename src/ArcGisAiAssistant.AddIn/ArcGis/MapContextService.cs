@@ -1,0 +1,130 @@
+using ArcGIS.Core.Data;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using ArcGisAiAssistant.AddIn.Models;
+
+namespace ArcGisAiAssistant.AddIn.ArcGis;
+
+internal sealed class MapContextService
+{
+    public Task<AiRequestContext> CreateContextAsync(string userInput)
+    {
+        return QueuedTask.Run(() =>
+        {
+            var activeMapView = MapView.Active;
+            var map = activeMapView?.Map;
+            var layers = map?.GetLayersAsFlattenedList().ToArray() ?? Array.Empty<Layer>();
+            var layerNames = layers.Select(layer => layer.Name).ToArray();
+            var layerProfiles = layers.Select(CreateLayerProfile).ToArray();
+            var selectedLayerNames = TryGetSelectedLayerNames(activeMapView);
+
+            return new AiRequestContext(
+                userInput,
+                map?.Name,
+                layerNames,
+                layerProfiles,
+                selectedLayerNames,
+                activeMapView?.Extent?.ToString());
+        });
+    }
+
+    private static LayerProfile CreateLayerProfile(Layer layer)
+    {
+        var fields = Array.Empty<LayerFieldProfile>();
+        long? rowCount = null;
+        string? geometryType = null;
+
+        if (layer is BasicFeatureLayer featureLayer)
+        {
+            geometryType = featureLayer.ShapeType.ToString();
+
+            try
+            {
+                using var table = featureLayer.GetTable();
+                fields = table.GetDefinition()
+                    .GetFields()
+                    .Take(40)
+                    .Select(CreateFieldProfile)
+                    .ToArray();
+                rowCount = TryGetRowCount(table);
+            }
+            catch
+            {
+                fields = Array.Empty<LayerFieldProfile>();
+            }
+        }
+
+        return new LayerProfile(
+            layer.Name,
+            layer.GetType().Name,
+            geometryType,
+            layer.IsVisible,
+            TryGetBoolProperty(layer, "IsSelectable") ?? false,
+            TryInvokeString(layer, "GetDefinitionQuery"),
+            layer.URI,
+            rowCount,
+            fields);
+    }
+
+    private static LayerFieldProfile CreateFieldProfile(Field field)
+    {
+        return new LayerFieldProfile(
+            field.Name,
+            string.IsNullOrWhiteSpace(field.AliasName) ? field.Name : field.AliasName,
+            field.FieldType.ToString(),
+            field.IsNullable);
+    }
+
+    private static long? TryGetRowCount(Table table)
+    {
+        try
+        {
+            return table.GetCount();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static IReadOnlyList<string> TryGetSelectedLayerNames(MapView? mapView)
+    {
+        if (mapView is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        try
+        {
+            return mapView.GetSelectedLayers().Select(layer => layer.Name).ToArray();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    private static bool? TryGetBoolProperty(object value, string propertyName)
+    {
+        try
+        {
+            return value.GetType().GetProperty(propertyName)?.GetValue(value) as bool?;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? TryInvokeString(object value, string methodName)
+    {
+        try
+        {
+            return value.GetType().GetMethod(methodName, Type.EmptyTypes)?.Invoke(value, null)?.ToString();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
