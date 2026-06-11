@@ -493,7 +493,7 @@ internal class AiAssistantDockPaneViewModel : DockPane
 
         try
         {
-            var context = await _mapContextService.CreateContextAsync("分析项目").ConfigureAwait(true);
+            var context = await _mapContextService.CreateContextAsync("分析项目", _maskExtent, _maskFieldValues).ConfigureAwait(true);
             AddStep("Map context", FormatContext(context));
 
             var analysisPrompt = _promptOrchestrator.BuildAnalysisPrompt(context);

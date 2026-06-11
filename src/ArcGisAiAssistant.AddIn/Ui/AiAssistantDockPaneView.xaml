@@ -96,23 +96,6 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </Expander>
-      <ListBox ItemsSource="{Binding TaskHistory}"
-               MaxHeight="140"
-               BorderThickness="0"
-               Background="Transparent">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding ShortSummary}"
-                       FontSize="11"
-                       Foreground="#666"
-                       TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"
-                       ToolTip="{Binding DetailText}"
-                       Margin="0,1" />
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-    </Expander>
 
     <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button MinWidth="96" Padding="12,6" Content="分析项目"

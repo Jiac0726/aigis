@@ -312,11 +312,14 @@ return ExecutionResult.Failure($"{arcgisToolName} failed: {ex.GetType().Name}: {
             try
             {
                 var createValues = Geoprocessing.MakeValueArray(sandboxGdb);
-                Geoprocessing.ExecuteToolAsync(
-                    "management.CreateFileGDB",
-                    createValues,
-                    null, null, null,
-                    GPExecuteToolFlags.None).GetAwaiter().GetResult();
+                ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    await Geoprocessing.ExecuteToolAsync(
+                        "management.CreateFileGDB",
+                        createValues,
+                        null, null, null,
+                        GPExecuteToolFlags.None);
+                }).GetAwaiter().GetResult();
             }
             catch
             {

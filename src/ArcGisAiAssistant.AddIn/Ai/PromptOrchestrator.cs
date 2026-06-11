@@ -107,7 +107,7 @@ internal sealed class PromptOrchestrator
         prompt.AppendLine("You are analyzing an ArcGIS Pro 3.3 GIS project.");
         prompt.AppendLine("Based on the layers below, suggest 2-3 useful multi-step GIS analysis workflows.");
         prompt.AppendLine("Return ONLY valid JSON. No markdown, no code blocks.");
-        prompt.AppendLine(@"{""summary"":""project overview"",""suggestions"":[{""title"":""...分析方案标题..."",""description"":""...描述..."",""workflow"":{""summary"":""...workflow描述..."",""requiresConfirmation"":true,""steps"":[{""intent"":""analysis"",""toolName"":""buffer"",""parameters"":{""inputLayer"":""..."",""distance"":""500 Meters"",""outputName"":""..."",""},""requiresConfirmation"":true,""summary"":""...""}]}}]}");
+        prompt.AppendLine(@"{""summary"":""project overview"",""suggestions"":[{""title"":""...分析方案标题..."",""description"":""...描述..."",""workflow"":{""summary"":""...workflow描述..."",""requiresConfirmation"":true,""steps"":[{""intent"":""analysis"",""toolName"":""buffer"",""parameters"":{""inputLayer"":""..."",""distance"":""500 Meters"",""outputName"":""...""},,""requiresConfirmation"":true,""summary"":""...""}]}}]}");
         prompt.AppendLine("Allowed tools: buffer, clip, intersect, spatial_join, select_by_attribute, select_by_location, summary_statistics, zoom_to_layer, apply_symbology_from_layer.");
         prompt.AppendLine("Each suggestion.workflow must be a complete executable AiWorkflowPlan with steps.");
         prompt.AppendLine();
