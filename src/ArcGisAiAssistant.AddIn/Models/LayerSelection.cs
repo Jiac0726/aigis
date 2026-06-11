@@ -1,8 +1,9 @@
-﻿using ArcGIS.Desktop.Framework.ComponentModel;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ArcGisAiAssistant.AddIn.Models;
 
-internal sealed class LayerSelection : ObservableObject
+internal sealed class LayerSelection : INotifyPropertyChanged
 {
     private bool _isSelected;
 
@@ -14,8 +15,18 @@ internal sealed class LayerSelection : ObservableObject
     public bool IsSelected
     {
         get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
+        set
+        {
+            if (_isSelected == value) return;
+            _isSelected = value;
+            OnPropertyChanged();
+        }
     }
 
     public string DisplayText => $"{Name} [{GeometryType}] {(RowCount.HasValue ? $"({RowCount})" : "")}";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
