@@ -25,7 +25,7 @@ internal sealed class MapContextService
             var map = activeMapView?.Map;
             var layers = map?.GetLayersAsFlattenedList().ToArray() ?? Array.Empty<Layer>();
             var layerNames = layers.Select(layer => layer.Name).ToArray();
-            var layerProfiles = layers.Select(CreateLayerProfile).ToArray();
+            var layerProfiles = layers.Select(l => CreateLayerProfile(l, maskFieldValues)).ToArray();
             var selectedLayerNames = TryGetSelectedLayerNames(activeMapView);
 
             return new AiRequestContext(
@@ -38,7 +38,7 @@ internal sealed class MapContextService
         });
     }
 
-    private static LayerProfile CreateLayerProfile(Layer layer)
+    private static LayerProfile CreateLayerProfile(Layer layer, bool maskFieldValues = false)
     {
         var fields = Array.Empty<LayerFieldProfile>();
         long? rowCount = null;
